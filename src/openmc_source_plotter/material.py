@@ -2,6 +2,34 @@ import openmc
 import matplotlib.pyplot as plt
 
 
+def _get_energy_prob(energy_dis):
+    """gets the energy and probability for different openmc.stats including the
+    openmc.stats.Mixutre which itself is made from openmc.stats"""
+
+    if isinstance(energy_dis, openmc.stats.Mixture):
+        stats = energy_dis.distribution
+        multipliers = energy_dis.probability
+    else:
+        stats = [energy_dis]
+        multipliers = [1.0]
+
+    probs = []
+    en = []
+
+    for stat, multiplier in zip(stats, multipliers):
+
+        for p in stat.p:
+            probs.append(0)
+            probs.append(p * multiplier)
+            probs.append(0)
+        for x in stat.x:
+            en.append(x)
+            en.append(x)
+            en.append(x)
+
+    return en, probs
+
+
 def plot_gamma_emission(
     material,
     label_top: int = None,
@@ -48,16 +76,9 @@ def plot_gamma_emission(
         probs = []
         en = []
         energy_dis = material.get_decay_photon_energy(clip_tolerance=0.0)
-        for p in energy_dis.p:
-            probs.append(0)
-            probs.append(p)
-            probs.append(0)
-        for x in energy_dis.x:
-            en.append(x)
-            en.append(x)
-            en.append(x)
-        # print(en)
-        # print(probs)
+
+        en, probs = _get_energy_prob(energy_dis)
+
         lineid_plot.plot_line_ids(
             en,
             # material.decay_photon_energy.x,
@@ -68,17 +89,9 @@ def plot_gamma_emission(
         )
 
     else:
-        probs = []
-        en = []
         energy_dis = material.get_decay_photon_energy(clip_tolerance=0.0)
-        for p in energy_dis.p:
-            probs.append(0)
-            probs.append(p)
-            probs.append(0)
-        for x in energy_dis.x:
-            en.append(x)
-            en.append(x)
-            en.append(x)
+
+        en, probs = _get_energy_prob(energy_dis)
 
         # plt.scatter(energy_dis.x, energy_dis.p)
         plt.plot(en, probs)
