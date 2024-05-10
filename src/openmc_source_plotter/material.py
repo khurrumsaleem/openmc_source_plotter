@@ -1,16 +1,17 @@
 import openmc
 import matplotlib.pyplot as plt
 
+
 def _get_energy_prob(energy_dis):
     """gets the energy and probability for different openmc.stats including the
-     openmc.stats.Mixutre which itself is made from openmc.stats"""
+    openmc.stats.Mixutre which itself is made from openmc.stats"""
 
     if isinstance(energy_dis, openmc.stats.Mixture):
         stats = energy_dis.distribution
         multipliers = energy_dis.probability
     else:
         stats = [energy_dis]
-        multipliers = [1.]
+        multipliers = [1.0]
 
     probs = []
     en = []
@@ -19,7 +20,7 @@ def _get_energy_prob(energy_dis):
 
         for p in stat.p:
             probs.append(0)
-            probs.append(p*multiplier)
+            probs.append(p * multiplier)
             probs.append(0)
         for x in stat.x:
             en.append(x)
@@ -27,6 +28,7 @@ def _get_energy_prob(energy_dis):
             en.append(x)
 
     return en, probs
+
 
 def plot_gamma_emission(
     material,
